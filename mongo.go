@@ -28,7 +28,7 @@ func NewMongoWithURL(url string) *Mongo {
 
 	if v, err := mongo.Connect(
 		ctx,
-		options.Client().SetConnectTimeout(MongoTimeout).ApplyURI(url),
+		options.Client().SetServerSelectionTimeout(MongoTimeout).ApplyURI(url),
 	); err == nil {
 		return &Mongo{
 			Conn: v,
@@ -37,6 +37,14 @@ func NewMongoWithURL(url string) *Mongo {
 	}
 
 	return nil
+}
+
+func (m Mongo) Connect() bool {
+	if err := m.Conn.Ping(m.Ctx, nil); err != nil {
+		return false
+	}
+
+	return true
 }
 
 func (m Mongo) Database() *mongo.Database {
